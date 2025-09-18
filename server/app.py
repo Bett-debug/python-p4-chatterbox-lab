@@ -13,6 +13,9 @@ CORS(app)
 migrate = Migrate(app, db)
 
 db.init_app(app)
+with app.app_context():
+    db.create_all()
+
 
 @app.route('/messages', methods=['GET'])
 def messages():
@@ -29,7 +32,7 @@ def create_message():
 
 @app.route('/messages/<int:id>', methods=['PATCH'])
 def update_message(id):
-    message = Message.query.get_or_404(id)
+    message = db.session.get(Message, id)
     data = request.get_json()
     message.body = data['body']
     db.session.commit()
@@ -37,7 +40,7 @@ def update_message(id):
 
 @app.route('/messages/<int:id>', methods=['DELETE'])
 def delete_message(id):
-    message = Message.query.get_or_404(id)
+    message = db.session.get(Message, id)
     db.session.delete(message)
     db.session.commit()
     return jsonify({'deleted': True})
