@@ -28,3 +28,15 @@ class Message(db.Model):
     
     def __repr__(self):
         return f'<Message {self.id} by {self.username}>'
+    
+    def test_updates_body_of_message_in_database(self):
+        with app.app_context():
+        # Create a message for this test
+            m = Message(body="Old text", username="tester")
+            db.session.add(m)
+            db.session.commit()
+
+            response = self.client.patch(f"/messages/{m.id}", json={"body": "New text"})
+            updated = Message.query.get(m.id)
+
+            assert updated.body == "New text"
